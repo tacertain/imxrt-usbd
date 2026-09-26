@@ -39,6 +39,16 @@ impl Qh {
         &mut self.overlay
     }
 
+    /// Returns an immutable reference to the overlay TD (for diagnostics)
+    pub fn overlay(&self) -> &Td {
+        &self.overlay
+    }
+
+    /// Read the raw CAPABILITIES register value
+    pub fn CAPABILITIES_read(&self) -> u32 {
+        self.CAPABILITIES.read()
+    }
+
     /// Sets the maximum packet length
     ///
     /// Clamps `max_packet_len` to 1024.

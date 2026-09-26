@@ -98,6 +98,16 @@ impl Td {
         ral::modify_reg!(crate::td, self, TOKEN, IOC: ioc as u32);
     }
 
+    /// Read the raw TOKEN register value (for diagnostics)
+    pub fn token_read(&self) -> u32 {
+        self.TOKEN.read()
+    }
+
+    /// Read a buffer pointer (for diagnostics). Index 0-4.
+    pub fn buffer_pointer_read(&self, index: usize) -> u32 {
+        self.BUFFER_POINTERS[index].read()
+    }
+
     /// Clean and invalidate this TD from DCache
     pub fn clean_invalidate_dcache(&self) {
         crate::cache::clean_invalidate_dcache_by_address(

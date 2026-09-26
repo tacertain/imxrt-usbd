@@ -75,6 +75,28 @@ impl Endpoint {
         self.qh.set_zero_length_termination(true);
     }
 
+    /// Return diagnostic state for debugging stuck endpoints.
+    ///
+    /// Returns `[qh_capabilities, qh_overlay_token, td_token, td_buffer0]`.
+    ///
+    /// - `qh_capabilities`: bit 29 = ZLT (0=enabled, 1=disabled),
+    ///   bits 16-26 = max_packet_len
+    /// - `qh_overlay_token`: bit 31 = DT (data toggle), bits 16-30 = total_bytes,
+    ///   bits 0-7 = status (bit 7=active, 6=halted, 5=buf_err, 3=xact_err)
+    /// - `td_token`: same layout as overlay token but for the dTD
+    /// - `td_buffer0`: physical address of dTD buffer page 0
+    pub fn debug_state(&self) -> [u32; 4] {
+        // Read QH CAPABILITIES directly from the struct's volatile cell
+        let qh_cap = self.qh.CAPABILITIES_read();
+        // Read the QH overlay's TOKEN (contains data toggle at bit 31)
+        let qh_overlay_token = self.qh.overlay().token_read();
+        // Read the dTD's TOKEN (TOTAL_BYTES, STATUS, etc.)
+        let td_token = self.td.token_read();
+        // Read the dTD's first buffer pointer
+        let td_buf0 = self.td.buffer_pointer_read(0);
+        [qh_cap, qh_overlay_token, td_token, td_buf0]
+    }
+
     /// Indicates if the transfer descriptor is active
     pub fn is_primed(&self, usb: &ral::usb::Instance) -> bool {
         (match self.address.direction() {

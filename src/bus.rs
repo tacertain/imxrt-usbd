@@ -224,6 +224,16 @@ impl BusAdapter {
         self.with_usb_mut(|usb| usb.enable_zlt(ep_addr));
     }
 
+    /// Return diagnostic state for a given endpoint.
+    ///
+    /// Returns `Some([qh_cap, qh_overlay_token, td_token, td_buf0])`
+    /// or `None` if the endpoint isn't allocated. See
+    /// [`Endpoint::debug_state`](crate::endpoint::Endpoint::debug_state) for
+    /// the field layout.
+    pub fn ep_debug_state(&self, ep_addr: usb_device::endpoint::EndpointAddress) -> Option<[u32; 4]> {
+        self.with_usb(|usb| usb.ep_debug_state(ep_addr))
+    }
+
     /// Immutable access to the USB peripheral
     fn with_usb<R>(&self, func: impl FnOnce(&Driver) -> R) -> R {
         let with_cs = |cs: &'_ _| {

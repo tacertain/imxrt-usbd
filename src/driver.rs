@@ -141,6 +141,14 @@ impl Driver {
         }
     }
 
+    /// Return diagnostic state for a given endpoint.
+    ///
+    /// Returns `Some([qh_cap, qh_overlay_token, td_token, td_buf0])`
+    /// or `None` if the endpoint isn't allocated.
+    pub fn ep_debug_state(&self, ep_addr: EndpointAddress) -> Option<[u32; 4]> {
+        self.ep_allocator.endpoint(ep_addr).map(|ep| ep.debug_state())
+    }
+
     /// Enable (`true`) or disable (`false`) USB interrupts
     pub fn set_interrupts(&mut self, interrupts: bool) {
         if interrupts {
